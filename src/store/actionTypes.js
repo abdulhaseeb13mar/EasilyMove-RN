@@ -1,4 +1,3 @@
 export default {
-  ACTION_TYPE_1: 'ACTION_TYPE_1',
-  ACTION_TYPE_2: 'ACTION_TYPE_2',
+  SET_USER_ORDER: 'SET_USER_ORDER',
 };

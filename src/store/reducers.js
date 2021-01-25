@@ -1,13 +1,11 @@
 import {combineReducers} from 'redux';
 import ActionTypes from './actionTypes';
 
-let dummyState = {
-  dummyState: 'dummyState',
-};
+let UserOrder = {};
 
-const dummyReducer = (state = dummyState, action) => {
+const UserOrderReducer = (state = UserOrder, action) => {
   switch (action.type) {
-    case ActionTypes.ACTION_TYPE_1:
+    case ActionTypes.SET_USER_ORDER:
       state = Object.assign({}, state, {...action.payload});
       return state;
 
@@ -17,4 +15,4 @@ const dummyReducer = (state = dummyState, action) => {
   return state;
 };
 
-export default combineReducers({dummyReducer});
+export default combineReducers({UserOrderReducer});
