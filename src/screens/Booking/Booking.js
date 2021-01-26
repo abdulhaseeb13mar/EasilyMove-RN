@@ -101,7 +101,7 @@ function Booking(props) {
               style={{...styles.underline, borderColor: job.bgcolor}}></View>
             <View style={styles.RatingWrapper}>
               <Text style={styles.RatingText}>{job.rating}/5</Text>
-              <StarRating rating={parseFloat(job.rating)} size={100} />
+              <StarRating rating={job.rating} size={100} />
             </View>
             <Text style={styles.descWrapper}>{job.dis}</Text>
           </View>

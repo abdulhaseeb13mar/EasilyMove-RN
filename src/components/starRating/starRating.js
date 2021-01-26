@@ -3,9 +3,21 @@ import {View, StyleSheet, Image} from 'react-native';
 import FillStar from '../../assets/images/filled_star.png';
 import BlankStar from '../../assets/images/unfilled_star.png';
 import HalfStar from '../../assets/images/HalfFilled_star.png';
+import belowFourTwo from '../../assets/images/4_2_below.png';
+import AboveFourEight from '../../assets/images/4_8_above.png';
+import belowFourFive from '../../assets/images/4_5_below.png';
+import aboveFourFive from '../../assets/images/4_5_above.png';
 
 export default function StarRating(props) {
-  let {rating, size} = props;
+  let {size} = props;
+  let rating = parseFloat(props.rating);
+  // 0 for blank
+  // 1 for half filled
+  // 2 for fullfilled
+  // 3 for belowFourTwo
+  // 4 for AboveFourEight
+  // 5 for belowFourFive
+  // 6 for aboveFourFive
 
   const RenderStars = () => {
     rating > 5 ? (rating = 0) : null;
@@ -15,7 +27,21 @@ export default function StarRating(props) {
       return (
         <Image
           key={index}
-          source={el === 2 ? FillStar : el === 0 ? BlankStar : HalfStar}
+          source={
+            el === 2
+              ? FillStar
+              : el === 0
+              ? BlankStar
+              : el === 1
+              ? HalfStar
+              : el === 3
+              ? belowFourTwo
+              : el === 4
+              ? AboveFourEight
+              : el === 5
+              ? belowFourFive
+              : aboveFourFive
+          }
           style={styles.ST_star}
         />
       );
@@ -31,9 +57,20 @@ export default function StarRating(props) {
 
   const DecimalLogic = () => {
     const Arr = [],
-      Whole_number = parseInt(rating);
+      Whole_number = parseInt(rating),
+      fraction_value = parseInt(rating.toString().split('.')[1]);
     for (let i = 0; i < Whole_number; i++) Arr.push(2);
-    Arr.push(1);
+    fraction_value > 5 && fraction_value < 8
+      ? Arr.push(6)
+      : fraction_value <= 2
+      ? Arr.push(3)
+      : fraction_value > 2 && fraction_value < 5
+      ? Arr.push(5)
+      : fraction_value >= 8
+      ? Arr.push(4)
+      : fraction_value == 5
+      ? Arr.push(1)
+      : null;
     for (let n = 0; n < 5 - (Whole_number + 1); n++) Arr.push(0);
     return Arr;
   };
