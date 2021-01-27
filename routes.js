@@ -7,6 +7,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import Navigator from './src/shared/RefNavigation';
 import Home from './src/screens/Home/Home';
 import Bookings from './src/screens/Booking/Booking';
+import ContactDetails from './src/screens/ContactDetails/ContactDetails';
 
 const Stack = createStackNavigator();
 
@@ -24,6 +25,7 @@ export default function Routes(props) {
         }}>
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Bookings" component={Bookings} />
+        <Stack.Screen name="ContactDetails" component={ContactDetails} />
       </Stack.Navigator>
     </NavigationContainer>
   );

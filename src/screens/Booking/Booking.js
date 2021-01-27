@@ -4,28 +4,24 @@ import {
   Text,
   ImageBackground,
   StyleSheet,
-  TextInput,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
-import {Button, Slider, Overlay} from 'react-native-elements';
+import {Button, Slider} from 'react-native-elements';
 import {colors, metrics} from '../../shared/Theme';
 import StarRating from '../../components/starRating/starRating';
 import WrapperScreen from '../../components/WrapperScreen/WrapperScreen';
-import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import {connect} from 'react-redux';
 import {setUserOrderAction} from '../../store/actions';
 import NavigationRef from '../../shared/RefNavigation';
 import {useFocusEffect} from '@react-navigation/native';
 import CalendarStrip from 'react-native-calendar-strip';
-import {TouchableOpacity} from 'react-native-gesture-handler';
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
 
 function Booking(props) {
   const job = props.route.params;
   const [date, setDate] = useState(new Date());
-  const [phone, setPhone] = useState('');
   const [sliderValue, setSliderValue] = useState(1);
-  const [showModal, setShowModal] = useState(false);
-  const [phoneErrMsg, setPhoneErrMsg] = useState('');
   const [dateErrMsg, setDateErrMsg] = useState('');
   const [availableTimes, setAvailableTimes] = useState([
     '10:00',
@@ -39,43 +35,31 @@ function Booking(props) {
   useFocusEffect(
     React.useCallback(() => {
       return () => {
-        setPhoneErrMsg('');
         setDateErrMsg('');
-        setPhone('');
-        setSliderValue(1);
-        setDate(new Date());
-        setTime(availableTimes[0]);
       };
     }, []),
   );
 
-  const submitUserOrder = () => {
+  const proceedToBookings = () => {
     let isValid = checkValidation();
     if (!isValid) return;
-    const order = {
-      PhoneNumber: phone,
-      Date: date,
+    const details = {
+      Date: `${date.getDate()}-${
+        date.getMonth() + 1 <= 10
+          ? '0' + (date.getMonth() + 1)
+          : date.getMonth() + 1
+      }-${date.getFullYear()}`,
       Time: time,
       Rooms: sliderValue,
       ServiceName: job.subcategoryname,
     };
-    props.setUserOrderAction(order);
-    setShowModal(true);
+    props.setUserOrderAction(details);
+    NavigationRef.Navigate('ContactDetails');
   };
 
-  const closeModal = () => {
-    setShowModal(false);
-    NavigationRef.Push('Home');
-  };
-
-  const clearAllErrMsgs = () => {
-    setDateErrMsg('');
-    setPhoneErrMsg('');
-  };
   const checkValidation = () => {
     clearAllErrMsgs();
-    let flag = false;
-
+    let flag = true;
     let selectedDate = new Date(date);
     let formatSelectedDate = `${selectedDate.getFullYear()}-${
       selectedDate.getMonth() + 1 <= 10
@@ -88,12 +72,6 @@ function Booking(props) {
         ? '0' + (currentDate.getMonth() + 1)
         : currentDate.getMonth() + 1
     }-${currentDate.getDate()}`;
-
-    phone.length == 0
-      ? setPhoneErrMsg('Phone number is Empty')
-      : phone.length != 11
-      ? setPhoneErrMsg('Number should be 11 digits')
-      : (flag = true);
     if (new Date(formatSelectedDate) < new Date(formatCurrentDate)) {
       setDateErrMsg('Select a valid Date');
       flag = false;
@@ -101,13 +79,10 @@ function Booking(props) {
     return flag;
   };
 
-  const changeAvailableTime = (t) => {
-    setTime(t);
-  };
-
-  const ChangeDate = (d) => setDate(d);
+  const changeAvailableTime = (t) => setTime(t);
+  const ChangeDate = (d) => setDate(new Date(d));
+  const clearAllErrMsgs = () => setDateErrMsg('');
   const onSliderChange = (val) => setSliderValue(val);
-  const onPhoneChange = (e) => setPhone(e);
 
   return (
     <WrapperScreen style={{backgroundColor: 'white'}}>
@@ -194,12 +169,7 @@ function Booking(props) {
                 <TouchableOpacity
                   key={t}
                   onPress={() => changeAvailableTime(t)}
-                  style={{
-                    borderRadius: 5,
-                    borderColor: '#edeef0',
-                    borderWidth: 1,
-                    padding: metrics.width * 0.02,
-                  }}>
+                  style={styles.availableTimeButton}>
                   <Text
                     style={{
                       ...styles.availableTimeText,
@@ -211,46 +181,24 @@ function Booking(props) {
               ))}
             </View>
           </View>
-          <View style={styles.PhoneWrapper}>
-            {phoneErrMsg ? (
-              <Text style={styles.phoneErrorMsg}>{'* ' + phoneErrMsg}</Text>
-            ) : null}
-            <View style={styles.PhoneInputWrapper}>
-              <FontAwesome name="phone" size={25} style={styles.phoneIcon} />
-              <TextInput
-                value={phone}
-                placeholder="Enter Phone Number"
-                style={styles.phoneInput}
-                keyboardType="number-pad"
-                onChangeText={onPhoneChange}
-              />
-            </View>
-          </View>
         </View>
       </ScrollView>
       <View style={styles.ConfirmButtonWrapper}>
         <Button
-          title="Confirm Booking"
+          title="Proceed To Booking"
           buttonStyle={styles.confirmButton}
-          onPress={submitUserOrder}
+          onPress={proceedToBookings}
+          icon={
+            <FontAwesome
+              name="arrow-right"
+              color="white"
+              size={metrics.width * 0.05}
+              style={{marginLeft: metrics.width * 0.02}}
+            />
+          }
+          iconRight
         />
       </View>
-      <Overlay
-        isVisible={showModal}
-        onBackdropPress={closeModal}
-        animationType="fade">
-        <View style={styles.ModalWrapper}>
-          <FontAwesome
-            name="check-circle"
-            size={metrics.width * 0.25}
-            color="green"
-          />
-          <Text style={styles.ModalHeadText}>THANK YOU!</Text>
-          <Text style={styles.ModalSubText}>
-            Your Booking has been scheduled!
-          </Text>
-        </View>
-      </Overlay>
     </WrapperScreen>
   );
 }
@@ -266,6 +214,12 @@ export default connect(mapStateToProps, {setUserOrderAction})(
 );
 
 const styles = StyleSheet.create({
+  availableTimeButton: {
+    borderRadius: 5,
+    borderColor: '#edeef0',
+    borderWidth: 1,
+    padding: metrics.width * 0.02,
+  },
   dateNameStyle: {
     color: colors.darkGray,
     fontSize: metrics.width * 0.032,
@@ -305,24 +259,6 @@ const styles = StyleSheet.create({
     elevation: 1,
     marginTop: 2,
   },
-  ModalSubText: {
-    fontSize: metrics.width * 0.045,
-    color: colors.darkGray,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  ModalHeadText: {
-    fontSize: metrics.width * 0.09,
-    fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  ModalWrapper: {
-    paddingVertical: metrics.height * 0.04,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: metrics.width * 0.8,
-  },
   confirmButton: {
     width: metrics.width,
     paddingVertical: metrics.height * 0.015,
@@ -336,27 +272,6 @@ const styles = StyleSheet.create({
   dateErrorMsg: {
     marginLeft: 10,
     color: 'red',
-  },
-  phoneErrorMsg: {
-    marginLeft: 10,
-    color: 'red',
-    marginBottom: -8,
-  },
-  phoneIcon: {width: '11%', textAlign: 'center', color: colors.primary},
-  phoneInput: {
-    width: '89%',
-    color: colors.darkGray,
-    fontWeight: 'bold',
-  },
-  PhoneInputWrapper: {
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  PhoneWrapper: {
-    marginVertical: metrics.height * 0.01,
-    borderBottomColor: colors.primary,
-    borderBottomWidth: 2,
   },
   ApartmentText: {
     marginLeft: 10,
